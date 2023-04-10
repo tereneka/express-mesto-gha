@@ -1,46 +1,54 @@
 const User = require("../models/user");
-const BadRequestError = require("../errors/badRequestError");
-const NotFoundError = require("../errors/notFoundError");
-const DefaultError = require("../errors/defaultError");
-const { sendResult, sendError } = require("../utils/utils");
+const {
+  OK,
+  BAD_REQUEST_ERROR,
+  NOT_FOUND_ERROR,
+  DEFAULT_ERROR,
+  errMessages,
+} = require("../utils/errStatus");
 
-module.exports.getUsers = (_, res) => {
+const getUsers = (_, res) => {
   User.find({})
-    .then((users) => res.status(200).res.send(users))
-    .catch(() =>
-      res.status(500).res.send({ message: "Что-то пошло не так..." })
-    );
-};
-
-module.exports.getUser = (req, res) => {
-  User.findById(req.params.userId)
-    .then((user) =>
-      sendResult(user, res, new NotFoundError("Пользователь не найден."))
-    )
-    .catch((err) => {
-      if (err instanceof NotFoundError) {
-        sendError(res, err);
-        return;
-      }
-      res.status(500).res.send({ message: "Что-то пошло не так..." });
+    .then((users) => res.status(OK).send(users))
+    .catch(() => {
+      res.status(DEFAULT_ERROR).send({ message: errMessages.default });
     });
 };
 
-module.exports.createUser = (req, res) => {
+const getUser = (req, res) => {
+  return User.findById(req.params.userId)
+    .then((user) => {
+      if (user) {
+        res.status(OK).send(user);
+      } else {
+        res.status(NOT_FOUND_ERROR).send({ message: errMessages.notFound });
+      }
+    })
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return res
+          .status(BAD_REQUEST_ERROR)
+          .send({ message: errMessages.badRequest });
+      }
+      return res.status(DEFAULT_ERROR).send({ message: errMessages.default });
+    });
+};
+
+const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
-
   User.create({ name, about, avatar })
-    .then((user) => sendResult(user, res, new BadRequestError()))
+    .then((user) => res.status(OK).send(user))
     .catch((err) => {
-      if (err instanceof BadRequestError) {
-        sendError(res, err);
-        return;
+      if (err.name === "ValidationError") {
+        return res
+          .status(BAD_REQUEST_ERROR)
+          .send({ message: errMessages.badRequest });
       }
-      res.status(500).res.send({ message: "Что-то пошло не так..." });
+      return res.status(DEFAULT_ERROR).send({ message: errMessages.default });
     });
 };
 
-module.exports.editProfile = (req, res) => {
+const editProfile = (req, res) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(
@@ -51,32 +59,48 @@ module.exports.editProfile = (req, res) => {
       runValidators: true,
     }
   )
-    .then((user) => sendResult(user, res, new NotFoundError()))
-    .catch((err) => {
-      if (err instanceof NotFoundError) {
-        sendError(res, err);
-        return;
-      } else if (err.name === "ValidationError") {
-        sendError(res, new BadRequestError());
-        return;
+    .then((user) => {
+      if (user) {
+        res.status(OK).send(user);
+      } else {
+        res.status(NOT_FOUND_ERROR).send({ message: errMessages.notFound });
       }
-      res.status(500).res.send({ message: "Что-то пошло не так..." });
+    })
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        return res
+          .status(BAD_REQUEST_ERROR)
+          .send({ message: errMessages.badRequest });
+      }
+      return res.status(DEFAULT_ERROR).send({ message: errMessages.default });
     });
 };
 
-module.exports.editAvatar = (req, res) => {
-  const { avatar } = req.body;
+const editAvatar = (req, res) => {
+  const { name, about } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, { avatar })
-    .then((user) => sendResult(user, res, new NotFoundError()))
-    .catch((err) => {
-      if (err instanceof NotFoundError) {
-        sendError(res, err);
-        return;
-      } else if (err.name === "ValidationError") {
-        sendError(res, new BadRequestError());
-        return;
+  User.findByIdAndUpdate(req.user._id, { name, about })
+    .then((user) => {
+      if (user) {
+        res.status(OK).send(user);
+      } else {
+        res.status(NOT_FOUND_ERROR).send({ message: errMessages.notFound });
       }
-      res.status(500).res.send({ message: "Что-то пошло не так..." });
+    })
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        return res
+          .status(BAD_REQUEST_ERROR)
+          .send({ message: errMessages.badRequest });
+      }
+      return res.status(DEFAULT_ERROR).send({ message: errMessages.default });
     });
+};
+
+module.exports = {
+  getUsers,
+  getUser,
+  createUser,
+  editProfile,
+  editAvatar,
 };

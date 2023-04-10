@@ -1,85 +1,112 @@
 const Card = require("../models/card");
-const BadRequestError = require("../errors/badRequestError");
-const NotFoundError = require("../errors/notFoundError");
-const DefaultError = require("../errors/defaultError");
-const { sendResult, sendError } = require("../utils/utils");
+const {
+  OK,
+  BAD_REQUEST_ERROR,
+  NOT_FOUND_ERROR,
+  DEFAULT_ERROR,
+  errMessages,
+} = require("../utils/errStatus");
 
 const userModel = [
   { path: "owner", model: "user" },
   { path: "likes", model: "user" },
 ];
 
-module.exports.getCards = (_, res) => {
+const getCards = (_, res) => {
   Card.find({})
     .populate(userModel)
-    .then((cards) => res.status(200).res.send(cards))
-    .catch(() =>
-      res.status(500).res.send({ message: "Что-то пошло не так..." })
-    );
+    .then((users) => res.status(OK).send(users))
+    .catch(() => {
+      res.status(DEFAULT_ERROR).send({ message: errMessages.default });
+    });
 };
 
-module.exports.createCard = (req, res) => {
+const createCard = (req, res) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => sendResult(card, res, new BadRequestError()))
+    .then((card) => res.status(OK).send(card))
     .catch((err) => {
-      if (err instanceof BadRequestError) {
-        sendError(res, err);
-        return;
+      if (err.name === "ValidationError") {
+        return res
+          .status(BAD_REQUEST_ERROR)
+          .send({ message: errMessages.badRequest });
       }
-      res.status(500).res.send({ message: "Что-то пошло не так..." });
+      return res.status(DEFAULT_ERROR).send({ message: errMessages.default });
     });
 };
 
-module.exports.deleteCard = (req, res) => {
+const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => sendResult(card, res, new NotFoundError()))
-    .catch(() => {
-      if (err instanceof NotFoundError) {
-        sendError(res, err);
-        return;
+    .then((card) => {
+      if (card) {
+        res.status(OK).send(card);
+      } else {
+        res.status(NOT_FOUND_ERROR).send({ message: errMessages.notFound });
       }
-      res.status(500).res.send({ message: "Что-то пошло не так..." });
+    })
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return res
+          .status(BAD_REQUEST_ERROR)
+          .send({ message: errMessages.badRequest });
+      }
+      return res.status(DEFAULT_ERROR).send({ message: errMessages.default });
     });
 };
 
-module.exports.likeCard = (req, res) => {
+const likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
     { new: true }
   )
     .populate(userModel)
-    .then((card) => sendResult(card, res, new NotFoundError()))
-    .catch((err) => {
-      if (err instanceof NotFoundError) {
-        sendError(res, err);
-        return;
-      } else if (err.name === "ValidationError") {
-        sendError(res, new BadRequestError());
-        return;
+    .then((card) => {
+      if (card) {
+        res.status(OK).send(card);
+      } else {
+        res.status(NOT_FOUND_ERROR).send({ message: errMessages.notFound });
       }
-      res.status(500).res.send({ message: "Что-то пошло не так..." });
+    })
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return res
+          .status(BAD_REQUEST_ERROR)
+          .send({ message: errMessages.badRequest });
+      }
+      return res.status(DEFAULT_ERROR).send({ message: errMessages.default });
     });
 };
 
-module.exports.dislikeCard = (req, res) => {
+const dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
     { new: true }
   )
     .populate(userModel)
-    .then((card) => sendResult(card, res, new NotFoundError()))
-    .catch((err) => {
-      if (err instanceof NotFoundError) {
-        sendError(res, err);
-        return;
-      } else if (err.name === "ValidationError") {
-        sendError(res, new BadRequestError());
-        return;
+    .then((card) => {
+      if (card) {
+        res.status(OK).send(card);
+      } else {
+        res.status(NOT_FOUND_ERROR).send({ message: errMessages.notFound });
       }
-      res.status(500).res.send({ message: "Что-то пошло не так..." });
+    })
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return res
+          .status(BAD_REQUEST_ERROR)
+          .send({ message: errMessages.badRequest });
+      }
+      return res.status(DEFAULT_ERROR).send({ message: errMessages.default });
     });
+};
+
+module.exports = {
+  getCards,
+  createCard,
+  deleteCard,
+  likeCard,
+  dislikeCard,
 };
