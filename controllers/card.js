@@ -4,12 +4,14 @@ const NotFoundError = require("../errors/notFoundError");
 const DefaultError = require("../errors/defaultError");
 const { sendResult, sendError } = require("../utils/utils");
 
+const userModel = [
+  { path: "owner", model: "user" },
+  { path: "likes", model: "user" },
+];
+
 module.exports.getCards = (_, res) => {
   Card.find({})
-    .populate([
-      { path: "owner", model: "user" },
-      { path: "likes", model: "user" },
-    ])
+    .populate(userModel)
     .then((cards) => res.send(cards))
     .catch(() => sendError(res, new DefaultError()));
 };
@@ -40,6 +42,7 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true }
   )
+    .populate(userModel)
     .then((card) => sendResult(card, res, new BadRequestError()))
     .catch((err) => {
       if (err instanceof BadRequestError) {
@@ -56,6 +59,7 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true }
   )
+    .populate(userModel)
     .then((card) => sendResult(card, res, new BadRequestError()))
     .catch((err) => {
       if (err instanceof BadRequestError) {
