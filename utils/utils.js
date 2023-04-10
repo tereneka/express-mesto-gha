@@ -2,7 +2,7 @@ function sendResult(data, res, err) {
   if (!data) {
     throw err;
   }
-  res.send(data);
+  res.status(200).res.send(data);
 }
 
 function sendError(res, err) {

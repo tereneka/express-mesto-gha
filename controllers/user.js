@@ -6,8 +6,10 @@ const { sendResult, sendError } = require("../utils/utils");
 
 module.exports.getUsers = (_, res) => {
   User.find({})
-    .then((users) => res.send(users))
-    .catch(() => sendError(res, new DefaultError()));
+    .then((users) => res.status(200).res.send(users))
+    .catch(() =>
+      res.status(500).res.send({ message: "Что-то пошло не так..." })
+    );
 };
 
 module.exports.getUser = (req, res) => {
@@ -20,7 +22,7 @@ module.exports.getUser = (req, res) => {
         sendError(res, err);
         return;
       }
-      sendError(res, new DefaultError());
+      res.status(500).res.send({ message: "Что-то пошло не так..." });
     });
 };
 
@@ -34,7 +36,7 @@ module.exports.createUser = (req, res) => {
         sendError(res, err);
         return;
       }
-      sendError(res, new DefaultError());
+      res.status(500).res.send({ message: "Что-то пошло не так..." });
     });
 };
 
@@ -49,13 +51,16 @@ module.exports.editProfile = (req, res) => {
       runValidators: true,
     }
   )
-    .then((user) => sendResult(user, res, new BadRequestError()))
+    .then((user) => sendResult(user, res, new NotFoundError()))
     .catch((err) => {
-      if (err instanceof BadRequestError) {
+      if (err instanceof NotFoundError) {
         sendError(res, err);
         return;
+      } else if (err.name === "ValidationError") {
+        sendError(res, new BadRequestError());
+        return;
       }
-      sendError(res, new DefaultError());
+      res.status(500).res.send({ message: "Что-то пошло не так..." });
     });
 };
 
@@ -63,12 +68,15 @@ module.exports.editAvatar = (req, res) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { avatar })
-    .then((user) => sendResult(user, res, new BadRequestError()))
+    .then((user) => sendResult(user, res, new NotFoundError()))
     .catch((err) => {
-      if (err instanceof BadRequestError) {
+      if (err instanceof NotFoundError) {
         sendError(res, err);
         return;
+      } else if (err.name === "ValidationError") {
+        sendError(res, new BadRequestError());
+        return;
       }
-      sendError(res, new DefaultError());
+      res.status(500).res.send({ message: "Что-то пошло не так..." });
     });
 };

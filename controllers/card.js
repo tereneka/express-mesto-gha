@@ -12,8 +12,10 @@ const userModel = [
 module.exports.getCards = (_, res) => {
   Card.find({})
     .populate(userModel)
-    .then((cards) => res.send(cards))
-    .catch(() => sendError(res, new DefaultError()));
+    .then((cards) => res.status(200).res.send(cards))
+    .catch(() =>
+      res.status(500).res.send({ message: "Что-то пошло не так..." })
+    );
 };
 
 module.exports.createCard = (req, res) => {
@@ -26,14 +28,20 @@ module.exports.createCard = (req, res) => {
         sendError(res, err);
         return;
       }
-      sendError(res, new DefaultError());
+      res.status(500).res.send({ message: "Что-то пошло не так..." });
     });
 };
 
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => res.send(card))
-    .catch(() => sendError(res, new DefaultError()));
+    .then((card) => sendResult(card, res, new NotFoundError()))
+    .catch(() => {
+      if (err instanceof NotFoundError) {
+        sendError(res, err);
+        return;
+      }
+      res.status(500).res.send({ message: "Что-то пошло не так..." });
+    });
 };
 
 module.exports.likeCard = (req, res) => {
@@ -43,13 +51,16 @@ module.exports.likeCard = (req, res) => {
     { new: true }
   )
     .populate(userModel)
-    .then((card) => sendResult(card, res, new BadRequestError()))
+    .then((card) => sendResult(card, res, new NotFoundError()))
     .catch((err) => {
-      if (err instanceof BadRequestError) {
+      if (err instanceof NotFoundError) {
         sendError(res, err);
         return;
+      } else if (err.name === "ValidationError") {
+        sendError(res, new BadRequestError());
+        return;
       }
-      sendError(res, new DefaultError());
+      res.status(500).res.send({ message: "Что-то пошло не так..." });
     });
 };
 
@@ -60,12 +71,15 @@ module.exports.dislikeCard = (req, res) => {
     { new: true }
   )
     .populate(userModel)
-    .then((card) => sendResult(card, res, new BadRequestError()))
+    .then((card) => sendResult(card, res, new NotFoundError()))
     .catch((err) => {
-      if (err instanceof BadRequestError) {
+      if (err instanceof NotFoundError) {
         sendError(res, err);
         return;
+      } else if (err.name === "ValidationError") {
+        sendError(res, new BadRequestError());
+        return;
       }
-      sendError(res, new DefaultError());
+      res.status(500).res.send({ message: "Что-то пошло не так..." });
     });
 };
