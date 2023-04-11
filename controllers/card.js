@@ -1,11 +1,5 @@
 const Card = require("../models/card");
-const {
-  OK,
-  BAD_REQUEST_ERROR,
-  NOT_FOUND_ERROR,
-  DEFAULT_ERROR,
-  errMessages,
-} = require("../utils/errStatus");
+const { OK, DEFAULT_ERROR, errMessages } = require("../utils/errStatus");
 const { sendData, sendError } = require("../utils/utils");
 
 const userModel = [
