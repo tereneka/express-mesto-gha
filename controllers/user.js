@@ -6,6 +6,7 @@ const {
   DEFAULT_ERROR,
   errMessages,
   SUCCESS,
+  BAD_REQUEST_ERROR,
 } = require('../utils/errStatus');
 const { sendData } = require('../utils/utils');
 
