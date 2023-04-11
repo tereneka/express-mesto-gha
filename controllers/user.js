@@ -36,7 +36,8 @@ const getUser = (req, res) => {
 
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
-  User.create(req.body)
+
+  User.create({ name, about, avatar })
     .then((user) => res.status(OK).send(user))
     .catch((err) => {
       if (err.name === "ValidationError") {
@@ -74,9 +75,13 @@ const editProfile = (req, res) => {
 };
 
 const editAvatar = (req, res) => {
-  const { name, about } = req.body;
+  const { avatar } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, { name, about })
+  User.findByIdAndUpdate(
+    req.user._id,
+    { avatar },
+    { new: true, runValidators: true }
+  )
     .then((user) => {
       if (user) {
         res.status(OK).send(user);
