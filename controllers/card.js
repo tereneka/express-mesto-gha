@@ -6,6 +6,7 @@ const {
   DEFAULT_ERROR,
   errMessages,
 } = require("../utils/errStatus");
+const { sendData, sendError } = require("../utils/utils");
 
 const userModel = [
   { path: "owner", model: "user" },
@@ -16,9 +17,9 @@ const getCards = (_, res) => {
   Card.find({})
     .populate(userModel)
     .then((users) => res.status(OK).send(users))
-    .catch(() => {
-      res.status(DEFAULT_ERROR).send({ message: errMessages.default });
-    });
+    .catch(() =>
+      res.status(DEFAULT_ERROR).send({ message: errMessages.default })
+    );
 };
 
 const createCard = (req, res) => {
@@ -26,33 +27,13 @@ const createCard = (req, res) => {
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(OK).send(card))
-    .catch((err) => {
-      if (err.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: errMessages.badRequest });
-      }
-      return res.status(DEFAULT_ERROR).send({ message: errMessages.default });
-    });
+    .catch((err) => sendError(res, err, "ValidationError"));
 };
 
 const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => {
-      if (card) {
-        res.status(OK).send(card);
-      } else {
-        res.status(NOT_FOUND_ERROR).send({ message: errMessages.notFound });
-      }
-    })
-    .catch((err) => {
-      if (err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: errMessages.badRequest });
-      }
-      return res.status(DEFAULT_ERROR).send({ message: errMessages.default });
-    });
+    .then((card) => sendData(res, card))
+    .catch((err) => sendError(res, err, "CastError"));
 };
 
 const likeCard = (req, res) => {
@@ -62,21 +43,8 @@ const likeCard = (req, res) => {
     { new: true }
   )
     .populate(userModel)
-    .then((card) => {
-      if (card) {
-        res.status(OK).send(card);
-      } else {
-        res.status(NOT_FOUND_ERROR).send({ message: errMessages.notFound });
-      }
-    })
-    .catch((err) => {
-      if (err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: errMessages.badRequest });
-      }
-      return res.status(DEFAULT_ERROR).send({ message: errMessages.default });
-    });
+    .then((card) => sendData(res, card))
+    .catch((err) => sendError(res, err, "CastError"));
 };
 
 const dislikeCard = (req, res) => {
@@ -86,21 +54,8 @@ const dislikeCard = (req, res) => {
     { new: true }
   )
     .populate(userModel)
-    .then((card) => {
-      if (card) {
-        res.status(OK).send(card);
-      } else {
-        res.status(NOT_FOUND_ERROR).send({ message: errMessages.notFound });
-      }
-    })
-    .catch((err) => {
-      if (err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: errMessages.badRequest });
-      }
-      return res.status(DEFAULT_ERROR).send({ message: errMessages.default });
-    });
+    .then((card) => sendData(res, card))
+    .catch((err) => sendError(res, err, "CastError"));
 };
 
 module.exports = {
