@@ -13,14 +13,13 @@
     "url": "git+https://github.com/tereneka/express-mesto-gha.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "tereneka",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/tereneka/express-mesto-gha/issues"
   },
   "homepage": "https://github.com/tereneka/express-mesto-gha#readme",
   "dependencies": {
-    "body-parser": "^1.20.2",
     "eslint": "^8.38.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.27.5",

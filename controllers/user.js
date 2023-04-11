@@ -1,51 +1,78 @@
-const User = require("../models/user");
-const { OK, DEFAULT_ERROR, errMessages } = require("../utils/errStatus");
-const { sendData, sendError } = require("../utils/utils");
+const mongoose = require('mongoose');
+const { Error } = mongoose;
+const User = require('../models/user');
+const {
+  OK,
+  DEFAULT_ERROR,
+  errMessages,
+  SUCCESS,
+} = require('../utils/errStatus');
+const { sendData } = require('../utils/utils');
 
 const getUsers = (_, res) => {
   User.find({})
     .then((users) => res.status(OK).send(users))
-    .catch(() =>
-      res.status(DEFAULT_ERROR).send({ message: errMessages.default })
-    );
+    .catch(() => {
+      res.status(DEFAULT_ERROR).send({ message: errMessages.DEFAULT });
+    });
 };
 
 const getUser = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => sendData(res, user))
-    .catch((err) => sendError(res, err, "CastError"));
+    .catch((err) => {
+      // а разве тернарый оератор не прерывает функцию также как if-else?
+      if (err instanceof Error.CastError) {
+        res
+          .status(BAD_REQUEST_ERROR)
+          .send({ message: errMessages.BAD_REQUEST });
+      } else {
+        res.status(DEFAULT_ERROR).send({ message: errMessages.DEFAULT });
+      }
+    });
 };
 
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
 
   User.create({ name, about, avatar })
-    .then((user) => res.status(OK).send(user))
-    .catch((err) => sendError(res, err, "ValidationError"));
+    .then((user) => res.status(SUCCESS).send(user))
+    .catch((err) => {
+      if (err instanceof Error.ValidationError) {
+        res
+          .status(BAD_REQUEST_ERROR)
+          .send({ message: errMessages.BAD_REQUEST });
+      } else {
+        res.status(DEFAULT_ERROR).send({ message: errMessages.DEFAULT });
+      }
+    });
 };
 
-const editProfile = (req, res) => {
-  const { name, about } = req.body;
-
-  User.findByIdAndUpdate(
-    req.user._id,
-    { name, about },
-    { new: true, runValidators: true }
-  )
+function updateUserInfo(req, res, body) {
+  User.findByIdAndUpdate(req.user._id, body, {
+    new: true,
+    runValidators: true,
+  })
     .then((user) => sendData(res, user))
-    .catch((err) => sendError(res, err, "ValidationError"));
+    .catch((err) => {
+      if (err instanceof Error.ValidationError) {
+        res
+          .status(BAD_REQUEST_ERROR)
+          .send({ message: errMessages.BAD_REQUEST });
+      } else {
+        res.status(DEFAULT_ERROR).send({ message: errMessages.DEFAULT });
+      }
+    });
+}
+
+const editProfile = (req, res) => {
+  const body = { name: req.body.name, about: req.body.about };
+  updateUserInfo(req, res, body);
 };
 
 const editAvatar = (req, res) => {
-  const { avatar } = req.body;
-
-  User.findByIdAndUpdate(
-    req.user._id,
-    { avatar },
-    { new: true, runValidators: true }
-  )
-    .then((user) => sendData(res, user))
-    .catch((err) => sendError(res, err, "ValidationError"));
+  const body = { avatar: req.body.avatar };
+  updateUserInfo(req, res, body);
 };
 
 module.exports = {
