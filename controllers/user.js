@@ -14,7 +14,7 @@ const getUsers = (_, res, next) => {
 };
 
 const getUser = (req, res, next) => {
-  User.findById(req.params.userId)
+  User.findById(req.params.id)
     .then((user) => sendData(res, user))
     .catch(next);
 };
