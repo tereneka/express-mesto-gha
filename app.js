@@ -7,6 +7,7 @@ const { login, createUser } = require('./controllers/user');
 const auth = require('./middlewares/auth');
 const error = require('./middlewares/error');
 const customErr = require('./middlewares/customError');
+const { errors } = require('celebrate');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -24,12 +25,9 @@ app.use(cookieParser()); // подключаем парсер кук как ми
 //   credentials: 'include', // теперь куки посылаются вместе с запросом
 // });
 
-app.post('/signin', login);
-app.post('/signup', createUser);
-
-app.use(auth);
-
 app.use(router);
+
+app.use(errors());
 
 app.use(customErr);
 

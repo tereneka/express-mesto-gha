@@ -5,54 +5,51 @@ const bcrypt = require('bcryptjs');
 const AuthorizationErr = require('../errors/authorizationErr');
 const { errMessages } = require('../utils/errStatus');
 
-const userSchema = new Schema(
-  {
-    name: {
-      type: String,
-      minlength: [2, 'должно быть минимум 2 символа'],
-      maxlength: [30, 'должно быть максимум 30 символов'],
-      default: 'Жак-Ив Кусто',
-    },
-    about: {
-      type: String,
-      minlength: [2, 'должно быть минимум 2 символа'],
-      maxlength: [30, 'должно быть максимум 30 символов'],
-      default: 'Исследователь',
-    },
-    avatar: {
-      type: String,
-      default:
-        'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
-      validate: {
-        validator: function (v) {
-          return validator.isURL(v, {
-            protocols: ['http', 'https'],
-            require_protocol: true,
-          });
-        },
-        message: (props) => `${props.value} - некорректный url!`,
+const userSchema = new Schema({
+  name: {
+    type: String,
+    minlength: [2, 'должно быть минимум 2 символа'],
+    maxlength: [30, 'должно быть максимум 30 символов'],
+    default: 'Жак-Ив Кусто',
+  },
+  about: {
+    type: String,
+    minlength: [2, 'должно быть минимум 2 символа'],
+    maxlength: [30, 'должно быть максимум 30 символов'],
+    default: 'Исследователь',
+  },
+  avatar: {
+    type: String,
+    default:
+      'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    validate: {
+      validator: function (v) {
+        return validator.isURL(v, {
+          protocols: ['http', 'https'],
+          require_protocol: true,
+        });
       },
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      validate: {
-        validator: function (v) {
-          return validator.isEmail(v);
-        },
-        message: (props) => `${props.value} - некорректный email!`,
-      },
-    },
-    password: {
-      type: String,
-      required: true,
-      minlength: 8,
-      select: false, // запрет на отправку пароля при get запросах
+      message: (props) => `${props.value} - некорректный url!`,
     },
   },
-  { toObject: { useProjection: true }, toJSON: { useProjection: true } },
-);
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    validate: {
+      validator: function (v) {
+        return validator.isEmail(v);
+      },
+      message: (props) => `${props.value} - некорректный email!`,
+    },
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 8,
+    select: false, // запрет на отправку пароля при get запросах
+  },
+});
 
 userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email })
