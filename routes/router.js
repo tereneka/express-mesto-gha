@@ -7,10 +7,10 @@ const {
 } = require('../validators/userValidator');
 const router = require('express').Router();
 
-app.post('/signin', loginValidator, login);
-app.post('/signup', registerValidator, createUser);
+router.post('/signin', loginValidator, login);
+router.post('/signup', registerValidator, createUser);
 
-app.use(auth);
+router.use(auth);
 
 router.use('/users', require('./userRouter'));
 router.use('/cards', require('./cardRouter'));
