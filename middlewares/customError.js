@@ -4,7 +4,7 @@ const BadRequestErr = require('../errors/badRequestErr');
 const ConflictErr = require('../errors/conflictErr');
 const { errMessages } = require('../utils/errStatus');
 
-module.exports = (err, _, _, next) => {
+module.exports = (err, req, res, next) => {
   if (err instanceof Error.CastError || err instanceof Error.ValidationError) {
     next(new BadRequestErr(errMessages.BAD_REQUEST));
   } else if (err.code === 11000) {
