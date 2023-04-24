@@ -30,15 +30,7 @@ const createUser = (req, res, next) => {
   bcrypt.hash(password, 10).then((hash) => {
     User.create({ name, about, avatar, email, password: hash })
       .then((user) => res.status(SUCCESS).send(user))
-      .catch((err) => {
-        if (err.code === 11000) {
-          next(new ConflictErr('Пользователь с данным email уже существует'));
-        } else if (err.name === 'ValidationError') {
-          next(new BadRequestErr(err.message));
-        } else {
-          next(err);
-        }
-      });
+      .catch(next);
   });
 };
 
