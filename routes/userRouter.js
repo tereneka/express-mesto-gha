@@ -15,7 +15,7 @@ const {
 
 userRouter.get('/', getUsers);
 
-userRouter.get('/:userId', userIdValidator, getUser);
+userRouter.get('/:id', userIdValidator, getUser);
 
 userRouter.get('/me', getCurrentUser);
 

@@ -20,12 +20,9 @@ const getUser = (req, res, next) => {
 };
 
 const getCurrentUser = (req, res, next) => {
-  User.findOne({ _id: req.user._id })
-    .then((user) => res.send(user))
+  User.findById(req.user._id)
+    .then((user) => sendData(res, user))
     .catch(next);
-  // User.findById(req.user._id)
-  //   .then((user) => sendData(res, user))
-  //   .catch(next);
 };
 
 const createUser = (req, res, next) => {
