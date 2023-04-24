@@ -14,13 +14,13 @@ const getUsers = (_, res, next) => {
 };
 
 const getUser = (req, res, next) => {
-  User.findById(req.params.userId)
+  User.findById({ _id: req.params.id })
     .then((user) => sendData(res, user))
     .catch(next);
 };
 
 const getCurrentUser = (req, res, next) => {
-  User.findById(req.user._id)
+  User.findById({ _id: req.user._id })
     .then((user) => sendData(res, user))
     .catch(next);
 };
@@ -53,7 +53,7 @@ const login = (req, res, next) => {
           httpOnly: true,
           sameSite: true,
         })
-        .end();
+        .send({ email });
     })
     .catch(next);
 };

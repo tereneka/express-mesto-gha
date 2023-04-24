@@ -34,7 +34,7 @@ const createCard = (req, res, next) => {
 const deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
-      if (card.owner._id !== req.user._id) {
+      if (card.owner.toString() !== req.user._id) {
         throw new ForbiddenErr(errMessages.FORBIDDEN);
       }
       sendData(res, card);
