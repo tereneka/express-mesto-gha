@@ -20,7 +20,7 @@ const loginValidator = celebrate({
 
 const userIdValidator = celebrate({
   params: Joi.object().keys({
-    id: Joi.string().required().hex().length(24),
+    _id: Joi.string().required().hex().length(24),
   }),
 });
 
