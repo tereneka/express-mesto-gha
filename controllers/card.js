@@ -10,6 +10,7 @@ const {
 } = require('../utils/errStatus');
 const { sendData } = require('../utils/utils');
 const ForbiddenErr = require('../errors/forbiddenErr');
+const NotFoundError = require('../errors/notFoundErr');
 
 const userModel = [
   { path: 'owner', model: 'user' },
@@ -32,12 +33,19 @@ const createCard = (req, res, next) => {
 };
 
 const deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
+      if (!card) {
+        throw new NotFoundError(errMessages.NOT_FOUND);
+      }
+
       if (card.owner.toString() !== req.user._id) {
         throw new ForbiddenErr(errMessages.FORBIDDEN);
       }
-      sendData(res, card);
+
+      Card.findByIdAndRemove(req.params.cardId).then(() =>
+        res.send({ message: 'Пост удалён' }),
+      );
     })
     .catch(next);
 };
