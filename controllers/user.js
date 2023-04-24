@@ -14,13 +14,13 @@ const getUsers = (_, res, next) => {
 };
 
 const getUser = (req, res, next) => {
-  User.findById({ _id: req.params.id })
+  User.findById(req.params.userId)
     .then((user) => sendData(res, user))
     .catch(next);
 };
 
 const getCurrentUser = (req, res, next) => {
-  User.findById({ _id: req.user._id })
+  User.findById(req.user._id)
     .then((user) => sendData(res, user))
     .catch(next);
 };

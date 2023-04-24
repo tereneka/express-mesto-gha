@@ -1,13 +1,5 @@
-const mongoose = require('mongoose');
-const { Error } = mongoose;
 const Card = require('../models/card');
-const {
-  OK,
-  DEFAULT_ERROR,
-  errMessages,
-  SUCCESS,
-  BAD_REQUEST_ERROR,
-} = require('../utils/errStatus');
+const { OK, errMessages, SUCCESS } = require('../utils/errStatus');
 const { sendData } = require('../utils/utils');
 const ForbiddenErr = require('../errors/forbiddenErr');
 const NotFoundError = require('../errors/notFoundErr');
