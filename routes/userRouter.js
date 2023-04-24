@@ -5,11 +5,14 @@ const {
   createUser,
   editProfile,
   editAvatar,
+  getCurrentUser,
 } = require('../controllers/user');
 
 userRouter.get('/', getUsers);
 
 userRouter.get('/:userId', getUser);
+
+userRouter.get('/me', getCurrentUser);
 
 userRouter.patch('/me', editProfile);
 

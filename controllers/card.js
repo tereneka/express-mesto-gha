@@ -9,74 +9,54 @@ const {
   BAD_REQUEST_ERROR,
 } = require('../utils/errStatus');
 const { sendData } = require('../utils/utils');
+const ForbiddenErr = require('../errors/forbiddenErr');
 
 const userModel = [
   { path: 'owner', model: 'user' },
   { path: 'likes', model: 'user' },
 ];
 
-const getCards = (_, res) => {
+const getCards = (_, res, next) => {
   Card.find({})
     .populate(userModel)
     .then((users) => res.status(OK).send(users))
-    .catch(() =>
-      res.status(DEFAULT_ERROR).send({ message: errMessages.DEFAULT }),
-    );
+    .catch(next);
 };
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(SUCCESS).send(card))
-    .catch((err) => {
-      if (err instanceof Error.ValidationError) {
-        res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: errMessages.BAD_REQUEST });
-      } else {
-        res.status(DEFAULT_ERROR).send({ message: errMessages.DEFAULT });
-      }
-    });
+    .catch(next);
 };
 
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => sendData(res, card))
-    .catch((err) => {
-      if (err instanceof Error.CastError) {
-        res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: errMessages.BAD_REQUEST });
-      } else {
-        res.status(DEFAULT_ERROR).send({ message: errMessages.DEFAULT });
+    .then((card) => {
+      if (card.owner._id !== req.user._id) {
+        throw new ForbiddenErr(errMessages.FORBIDDEN);
       }
-    });
+      sendData(res, card);
+    })
+    .catch(next);
 };
 
-function setCardLike(req, res, option) {
+function setCardLike(req, res, option, next) {
   Card.findByIdAndUpdate(req.params.cardId, option, { new: true })
     .populate(userModel)
     .then((card) => sendData(res, card))
-    .catch((err) => {
-      if (err instanceof Error.CastError) {
-        res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: errMessages.BAD_REQUEST });
-      } else {
-        res.status(DEFAULT_ERROR).send({ message: errMessages.DEFAULT });
-      }
-    });
+    .catch(next);
 }
 
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   const option = { $addToSet: { likes: req.user._id } };
-  setCardLike(req, res, option);
+  setCardLike(req, res, option, next);
 };
 
-const dislikeCard = (req, res) => {
+const dislikeCard = (req, res, next) => {
   const option = { $pull: { likes: req.user._id } };
-  setCardLike(req, res, option);
+  setCardLike(req, res, option, next);
 };
 
 module.exports = {

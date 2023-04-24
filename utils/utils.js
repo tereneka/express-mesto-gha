@@ -1,9 +1,11 @@
-const { OK, NOT_FOUND_ERROR, errMessages } = require('./errStatus');
+const { OK, errMessages } = require('./errStatus');
+const NotFoundError = require('../errors/notFoundErr');
 
 function sendData(res, data) {
-  data
-    ? res.status(OK).send(data)
-    : res.status(NOT_FOUND_ERROR).send({ message: errMessages.NOT_FOUND });
+  if (!data) {
+    throw new NotFoundError(errMessages.NOT_FOUND);
+  }
+  res.status(OK).send(data);
 }
 
 module.exports = { sendData };

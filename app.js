@@ -5,6 +5,8 @@ const cookieParser = require('cookie-parser');
 const { router } = require('./routes/router');
 const { login, createUser } = require('./controllers/user');
 const auth = require('./middlewares/auth');
+const error = require('./middlewares/error');
+const customErr = require('./middlewares/customError');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -13,14 +15,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
-
-app.use((req, _, next) => {
-  req.user = {
-    _id: '643538a11ebdb8ccd173a354',
-  };
-
-  next();
-});
 
 app.use(cookieParser()); // подключаем парсер кук как мидлвэр
 
@@ -36,6 +30,10 @@ app.post('/signup', createUser);
 app.use(auth);
 
 app.use(router);
+
+app.use(customErr);
+
+app.use(error);
 
 app.listen(PORT, () => {
   console.log(`App listening on port: ${PORT}`);
