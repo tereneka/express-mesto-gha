@@ -3,9 +3,10 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { OK, SUCCESS } = require('../utils/errStatus');
 const { sendData } = require('../utils/utils');
-const { NODE_ENV, JWT_SECRET } = process.env;
+// const { NODE_ENV, JWT_SECRET } = process.env;
 const BadRequestErr = require('../errors/badRequestErr');
 const ConflictErr = require('../errors/conflictErr');
+const { JWT_SECRET } = require('../utils/constants');
 
 const getUsers = (_, res, next) => {
   User.find({})
@@ -39,7 +40,7 @@ const login = (req, res, next) => {
 
   User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'JWT_SECRET', {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: '7d',
       });
 
