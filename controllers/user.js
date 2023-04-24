@@ -1,17 +1,10 @@
-const mongoose = require('mongoose');
-const { Error } = mongoose;
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const {
-  OK,
-  DEFAULT_ERROR,
-  errMessages,
-  SUCCESS,
-  BAD_REQUEST_ERROR,
-} = require('../utils/errStatus');
+const { OK, SUCCESS } = require('../utils/errStatus');
 const { sendData } = require('../utils/utils');
 const { NODE_ENV, JWT_SECRET } = process.env;
+const BadRequestErr = require('../errors/badRequestErr');
 const ConflictErr = require('../errors/conflictErr');
 
 const getUsers = (_, res, next) => {
@@ -37,7 +30,15 @@ const createUser = (req, res, next) => {
   bcrypt.hash(password, 10).then((hash) => {
     User.create({ name, about, avatar, email, password: hash })
       .then((user) => res.status(SUCCESS).send(user))
-      .catch(next);
+      .catch((err) => {
+        if (err.code === 11000) {
+          next(new ConflictErr('Пользователь с данным email уже существует'));
+        } else if (err.name === 'ValidationError') {
+          next(new BadRequestErr(err.message));
+        } else {
+          next(err);
+        }
+      });
   });
 };
 

@@ -8,14 +8,14 @@ const { errMessages } = require('../utils/errStatus');
 const userSchema = new Schema({
   name: {
     type: String,
-    minlength: 2,
-    maxlength: 30,
+    minlength: [2, 'должно быть минимум 2 символа'],
+    maxlength: [30, 'должно быть максимум 30 символов'],
     default: 'Жак-Ив Кусто',
   },
   about: {
     type: String,
-    minlength: 2,
-    maxlength: 30,
+    minlength: [2, 'должно быть минимум 2 символа'],
+    maxlength: [30, 'должно быть максимум 30 символов'],
     default: 'Исследователь',
   },
   avatar: {
