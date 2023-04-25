@@ -2,7 +2,6 @@ const userRouter = require('express').Router();
 const {
   getUsers,
   getUser,
-  createUser,
   editProfile,
   editAvatar,
   getCurrentUser,
