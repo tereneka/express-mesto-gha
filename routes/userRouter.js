@@ -15,9 +15,9 @@ const {
 
 userRouter.get('/', getUsers);
 
-userRouter.get('/:id', userIdValidator, getUser);
-
 userRouter.get('/me', getCurrentUser);
+
+userRouter.get('/:id', userIdValidator, getUser);
 
 userRouter.patch('/me', userProfileValidator, editProfile);
 

@@ -3,10 +3,10 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { OK, SUCCESS } = require('../utils/errStatus');
 const { sendData } = require('../utils/utils');
-// const { NODE_ENV, JWT_SECRET } = process.env;
+const { NODE_ENV, JWT_SECRET } = process.env;
 const BadRequestErr = require('../errors/badRequestErr');
 const ConflictErr = require('../errors/conflictErr');
-const { JWT_SECRET } = require('../utils/constants');
+// const { JWT_SECRET } = require('../utils/constants');
 
 const getUsers = (_, res, next) => {
   User.find({})
@@ -21,11 +21,6 @@ const getUser = (req, res, next) => {
 };
 
 const getCurrentUser = (req, res, next) => {
-  // User.findOne({ _id: req.user._id })
-  //   .then((user) => {
-  //     res.send(user);
-  //   })
-  //   .catch(next);
   User.findById(req.user._id)
     .then((user) => sendData(res, user))
     .catch(next);
@@ -45,9 +40,13 @@ const login = (req, res, next) => {
 
   User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-        expiresIn: '7d',
-      });
+      const token = jwt.sign(
+        { _id: user._id },
+        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+        {
+          expiresIn: '7d',
+        },
+      );
 
       res
         .cookie('jwt', token, {
