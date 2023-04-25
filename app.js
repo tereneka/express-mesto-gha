@@ -29,7 +29,7 @@ app.use(router);
 
 app.use(errors());
 
-app.use(customErr);
+// app.use(customErr);
 
 app.use(error);
 

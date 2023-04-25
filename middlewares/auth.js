@@ -20,7 +20,7 @@ module.exports = (req, res, next) => {
       next(new AuthorizationErr(errMessages.NEED_AUTH));
     };
   }
-
+  console.log(payload);
   req.user = payload; // записываем пейлоуд в объект запроса
 
   next(); // пропускаем запрос дальше
