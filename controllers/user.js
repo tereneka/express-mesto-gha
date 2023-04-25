@@ -4,9 +4,6 @@ const User = require('../models/user');
 const { OK, SUCCESS } = require('../utils/errStatus');
 const { sendData } = require('../utils/utils');
 const { NODE_ENV, JWT_SECRET } = process.env;
-const BadRequestErr = require('../errors/badRequestErr');
-const ConflictErr = require('../errors/conflictErr');
-// const { JWT_SECRET } = require('../utils/constants');
 
 const getUsers = (_, res, next) => {
   User.find({})
@@ -34,7 +31,7 @@ const createUser = (req, res, next) => {
       .catch(next);
   });
 };
-// NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret';
+
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
