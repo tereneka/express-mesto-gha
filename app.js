@@ -2,12 +2,10 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const { errors } = require('celebrate');
 const { router } = require('./routes/router');
-const { login, createUser } = require('./controllers/user');
-const auth = require('./middlewares/auth');
 const error = require('./middlewares/error');
 const customErr = require('./middlewares/customError');
-const { errors } = require('celebrate');
 
 const { PORT = 3000 } = process.env;
 const app = express();

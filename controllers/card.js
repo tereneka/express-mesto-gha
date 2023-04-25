@@ -35,9 +35,9 @@ const deleteCard = (req, res, next) => {
         throw new ForbiddenErr(errMessages.FORBIDDEN);
       }
 
-      Card.findByIdAndRemove(req.params.cardId).then(() =>
-        res.send({ message: 'Пост удалён' }),
-      );
+      Card.findByIdAndRemove(req.params.cardId)
+        .then(() => res.send({ message: 'Пост удалён' }))
+        .catch(next);
     })
     .catch(next);
 };

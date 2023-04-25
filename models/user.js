@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+
 const { Schema } = mongoose;
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
@@ -24,7 +25,7 @@ const userSchema = new Schema(
       default:
         'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
       validate: {
-        validator: function (v) {
+        validator(v) {
           return validator.isURL(v, {
             protocols: ['http', 'https'],
             require_protocol: true,
@@ -38,7 +39,7 @@ const userSchema = new Schema(
       required: true,
       unique: true,
       validate: {
-        validator: function (v) {
+        validator(v) {
           return validator.isEmail(v);
         },
         message: (props) => `${props.value} - некорректный email!`,
@@ -47,7 +48,6 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: true,
-      minlength: 8,
       select: false, // запрет на отправку пароля при get запросах
     },
   },

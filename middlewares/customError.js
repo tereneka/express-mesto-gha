@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+
 const { Error } = mongoose;
 const BadRequestErr = require('../errors/badRequestErr');
 const ConflictErr = require('../errors/conflictErr');

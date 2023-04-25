@@ -1,8 +1,10 @@
+/* eslint-disable object-curly-newline */
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { OK, SUCCESS } = require('../utils/errStatus');
 const { sendData } = require('../utils/utils');
+
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 const getUsers = (_, res, next) => {
@@ -26,7 +28,13 @@ const getCurrentUser = (req, res, next) => {
 const createUser = (req, res, next) => {
   const { name, about, avatar, email, password } = req.body;
   bcrypt.hash(password, 10).then((hash) => {
-    User.create({ name, about, avatar, email, password: hash })
+    User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    })
       .then((user) => res.status(SUCCESS).send(user))
       .catch(next);
   });
@@ -56,6 +64,10 @@ const login = (req, res, next) => {
     .catch(next);
 };
 
+const logout = (req, res) => {
+  res.clearCookie('jwt').send({ message: 'Выход' });
+};
+
 function updateUserData(req, res, body, next) {
   User.findByIdAndUpdate(req.user._id, body, {
     new: true,
@@ -81,6 +93,7 @@ module.exports = {
   getCurrentUser,
   createUser,
   login,
+  logout,
   editProfile,
   editAvatar,
 };
