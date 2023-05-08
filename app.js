@@ -6,6 +6,7 @@ const { errors } = require('celebrate');
 const { router } = require('./routes/router');
 const error = require('./middlewares/error');
 const customErr = require('./middlewares/customError');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -23,7 +24,11 @@ app.use(cookieParser()); // подключаем парсер кук как ми
 //   credentials: 'include', // теперь куки посылаются вместе с запросом
 // });
 
+app.use(requestLogger); // подключаем логгер запросов
+
 app.use(router);
+
+app.use(errorLogger); // подключаем логгер ошибок
 
 app.use(errors());
 
